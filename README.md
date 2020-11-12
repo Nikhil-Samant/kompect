@@ -1,4 +1,4 @@
-# pichkoo
+# pichkoo - The Image Compressor
 
 ## Project setup
 ```
