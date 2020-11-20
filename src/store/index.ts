@@ -8,14 +8,21 @@ export default new Vuex.Store({
     /* Navigation Drawers */
     isSideMenuVisible: true,
     isSettingsMenuVisible: false,
+    isNotificationVisible: false,
+    notificationText: '',
   },
   mutations: {
-    toggleSidebar(state: any, payload) {
+    toggleSidebar(state, payload) {
       state.isSideMenuVisible = payload.value;
     },
 
-    toggleSettings(state: any, payload) {
+    toggleSettings(state, payload) {
       state.isSettingsMenuVisible = payload.value;
+    },
+
+    toggleNotifications(state, payload) {
+      state.isNotificationVisible = payload.value;
+      state.notificationText = payload.message;
     },
   },
   actions: {

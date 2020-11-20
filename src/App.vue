@@ -8,16 +8,18 @@
         <router-view></router-view>
       </v-container>
     </v-main>
+    <Notifications />
     <Footer />
   </v-app>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-import Sidebar from './components/Sidebar.vue';
-import Appbar from './components/Appbar.vue';
-import Settings from './components/Settings.vue';
-import Footer from './components/Footer.vue';
+import Sidebar from '@/components/Sidebar.vue';
+import Appbar from '@/components/Appbar.vue';
+import Settings from '@/components/Settings.vue';
+import Footer from '@/components/Footer.vue';
+import Notifications from '@/components/Notifications.vue';
 
 export default Vue.extend({
   name: 'App',
@@ -26,6 +28,7 @@ export default Vue.extend({
     Sidebar,
     Appbar,
     Settings,
+    Notifications,
     Footer,
   },
 
