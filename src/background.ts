@@ -1,12 +1,9 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import {
-  app, protocol, BrowserWindow, ipcMain,
-} from 'electron';
+import { app, protocol, BrowserWindow, ipcMain, dialog } from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
 import imagemin from 'imagemin';
 import imageminMozjpeg from 'imagemin-mozjpeg';
-import path from 'path';
 import { ImageRequest } from './shared/model/ImageRequest';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
@@ -74,7 +71,7 @@ app.on('ready', async () => {
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {
   if (process.platform === 'win32') {
-    process.on('message', (data) => {
+    process.on('message', data => {
       if (data === 'graceful-exit') {
         app.quit();
       }
@@ -86,22 +83,34 @@ if (isDevelopment) {
   }
 }
 
-ipcMain.on('minifyImageRequest', (event, images: ImageRequest[]) => {
-  console.log(images.length);
-  images.forEach(async (image) => {
-    const dest = path.join(path.dirname(image.destination as string), 'compressed');
-    await imagemin([image.source as string],
-      {
-        destination: dest,
-        plugins: [
-          imageminMozjpeg({ quality: image.quality }),
-        ],
-      }).then((file) => {
-      console.log(file);
-      // cb(null, Object.assign(file, {original: buf}));
-    }).catch((error) => {
-      console.log(error);
+ipcMain.handle('openDirectory', event => {
+  dialog
+    .showOpenDialog({
+      properties: ['openDirectory'],
+    })
+    .then(result => {
+      event.sender.send('outputDir', result.filePaths[0].toString());
+    })
+    .catch(err => {
+      console.log(err);
     });
+});
+
+ipcMain.handle('minifyImageRequest', (event, images: ImageRequest[]) => {
+  images.forEach(async (image, index) => {
+    const dest = image.destination;
+    await imagemin([image.source as string], {
+      destination: dest,
+      plugins: [
+        imageminMozjpeg({ quality: image.imageSettings.jpegSetting.quality }),
+      ],
+    })
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      .then(file => {
+        event.sender.send('fileMinified', index);
+      })
+      .catch(error => {
+        console.log(error);
+      });
   });
-  event.sender.send('minifyImageResponse', 'Image compressed sucessfully.');
 });

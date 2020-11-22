@@ -1,5 +1,9 @@
+import { JpegSettings } from './JpegSettings';
+
 export interface ImageRequest {
   source?: string;
   destination?: string;
-  quality: number;
+  imageSettings: {
+    jpegSetting: JpegSettings;
+  };
 }

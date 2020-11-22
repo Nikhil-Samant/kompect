@@ -31,6 +31,5 @@ export default Vue.extend({
     Notifications,
     Footer,
   },
-
 });
 </script>

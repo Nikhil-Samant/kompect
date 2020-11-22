@@ -5,7 +5,7 @@
         handler: onClickOutside,
         include: include,
       }"
-      :value="isSettingsMenuVisible"
+      :value="isSettingsVisible"
       app
       right
       temporary
@@ -21,49 +21,30 @@
           </v-list-item-content>
         </v-list-item>
       </template>
-      <v-expansion-panels>
-        <v-expansion-panel v-for="setting in settings" :key="setting.label">
-          <v-expansion-panel-header>
-            <template v-slot:default>
-              <v-row no-gutters>
-                <v-col cols="12"> {{ setting.label }} </v-col>
-              </v-row>
-            </template>
-          </v-expansion-panel-header>
-          <v-expansion-panel-content>
-            <!-- <v-text-field
-              v-model="trip.name"
-              placeholder="Caribbean Cruise"
-            ></v-text-field> -->
-          </v-expansion-panel-content>
-        </v-expansion-panel>
-      </v-expansion-panels>
+      <settings-menu
+        :setting="setting"
+        v-for="setting in allImageSettings"
+        :key="setting.name"
+      />
     </v-navigation-drawer>
   </v-card>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-import { mapState } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
+import SettingsMenu from './SettingsMenu.vue';
 
 export default Vue.extend({
+  components: { SettingsMenu },
   name: 'Settings',
-  data: () => ({
-    settings: [
-      {
-        label: 'JPEG',
-      },
-      {
-        label: 'PNG',
-      },
-    ],
-  }),
   computed: {
-    ...mapState(['isSettingsMenuVisible']),
+    ...mapGetters(['isSettingsVisible', 'allImageSettings']),
   },
   methods: {
+    ...mapActions(['toggleSettings', 'updateNewJpegSettings']),
     onClickOutside() {
-      this.$store.commit('toggleSettings', { value: false });
+      this.toggleSettings({ value: false });
     },
     include() {
       return [document.querySelector('.included')];

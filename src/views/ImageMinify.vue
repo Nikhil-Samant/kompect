@@ -1,6 +1,6 @@
 <template>
   <v-sheet color="white" elevation="1">
-    <v-form>
+    <v-form v-model="valid" ref="form" lazy-validation>
       <v-card class="mx-auto" outlined elevation="4">
         <v-card-title class="headline"> Minify Images </v-card-title>
         <v-row>
@@ -11,13 +11,17 @@
               counter
               multiple
               prepend-inner-icon="mdi-image"
-              v-model="sourceFile"
+              v-model="imageFiles"
+              required
+              :rules="[v => v.length > 0 || 'Please select atleast 1 file']"
             ></v-file-input>
           </v-col>
           <v-col cols="12" sm="6">
             <v-text-field
               v-model="destination"
               label="Output Directory"
+              @click="openDir"
+              :rules="[v => !!v || 'Please select the output directory']"
               required
             ></v-text-field>
           </v-col>
@@ -34,18 +38,11 @@
         </v-card-actions>
       </v-card>
     </v-form>
-    <v-dialog v-model="isloading" hide-overlay persistent width="300">
-      <v-card color="primary" dark>
-        <v-card-text>
-          Please wait while we minify your images
-          <v-progress-linear
-            indeterminate
-            color="white"
-            class="mb-0"
-          ></v-progress-linear>
-        </v-card-text>
-      </v-card>
-    </v-dialog>
+    <Progress
+      :isloading="isloading"
+      :file-minified="fileMinified"
+      :total-files="totalFiles"
+    />
   </v-sheet>
 </template>
 
@@ -53,41 +50,90 @@
 import Vue from 'vue';
 import { ipcRenderer } from 'electron';
 import path from 'path';
+import { mapActions, mapGetters } from 'vuex';
+import Progress from '@/components/Progress.vue';
 import { ImageRequest } from '../shared/model/ImageRequest';
 
 export default Vue.extend({
   name: 'ImageMinify',
+  components: {
+    Progress,
+  },
   data: () => ({
-    sourceFile: [],
-    destination: '/Users/nikhil/Desktop/',
-    quality: 75,
-    result: undefined,
+    imageFiles: [],
+    destination: '',
     isloading: false,
+    totalFiles: 0,
+    fileMinified: 0,
+    valid: true,
   }),
+  computed: {
+    ...mapGetters(['getNotification', 'getJpegSettings']),
+  },
   mounted() {
     this.$nextTick(() => {
       // Register IPC Renderer event handles once for this control
-      ipcRenderer.on('minifyImageResponse', (event, args) => {
-        this.isloading = false;
-        this.$store.commit('toggleNotifications', {
-          value: true,
-          message: args,
-        });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      ipcRenderer.on('fileMinified', async (event, fileIndex) => {
+        this.fileMinified += 1;
+        if (this.fileMinified === this.totalFiles) {
+          this.isloading = false;
+          this.showNotification();
+          this.reset();
+        }
+      });
+      ipcRenderer.on('outputDir', async (event, directory: string) => {
+        this.destination = directory;
       });
     });
   },
   methods: {
+    ...mapActions(['toggleNotifications']),
+    async openDir() {
+      await ipcRenderer.invoke('openDirectory');
+    },
     minify() {
-      this.isloading = true;
+      this.valid = (this.$refs.form as Vue & {
+        validate: () => boolean;
+      }).validate();
+      console.log(this.valid);
+      if (!this.valid) {
+        return;
+      }
       const request: ImageRequest[] = [];
+      this.totalFiles = this.imageFiles.length;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const filePaths = this.sourceFile.map((f: any) => path.resolve(f.path));
-      filePaths.forEach((source) => request.push({
-        source,
-        destination: this.destination,
-        quality: this.quality,
-      }));
-      ipcRenderer.send('minifyImageRequest', request);
+      const filePaths = this.imageFiles.map((f: any) => path.resolve(f.path));
+      this.isloading = true;
+      filePaths.forEach(source =>
+        request.push({
+          source,
+          destination: this.destination,
+          imageSettings: {
+            jpegSetting: this.getJpegSettings,
+          },
+        })
+      );
+      ipcRenderer.invoke('minifyImageRequest', request);
+    },
+    reset() {
+      this.fileMinified = 0;
+      this.totalFiles = 0;
+      (this.$refs.form as Vue & {
+        reset: () => boolean;
+      }).reset();
+    },
+    async showNotification() {
+      await this.toggleNotifications({
+        value: true,
+        message: `${this.totalFiles} image file(s) minified sucessfully.`,
+      });
+      setTimeout(async () => {
+        await this.toggleNotifications({
+          value: false,
+          message: '',
+        });
+      }, this.getNotification.timeout);
     },
   },
 });

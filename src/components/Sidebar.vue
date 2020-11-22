@@ -36,7 +36,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 
 export default Vue.extend({
   name: 'Sidebar',
@@ -58,8 +58,9 @@ export default Vue.extend({
     ...mapState(['isSideMenuVisible']),
   },
   methods: {
+    ...mapActions(['toggleSidebar']),
     onClickOutside() {
-      this.$store.commit('toggleSidebar', { value: false });
+      this.toggleSidebar({ value: false });
     },
     include() {
       return [document.querySelector('.included')];

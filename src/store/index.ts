@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import { defaultJpegSettings } from '../shared/model/JpegSettings';
 
 Vue.use(Vuex);
 
@@ -8,25 +9,54 @@ export default new Vuex.Store({
     /* Navigation Drawers */
     isSideMenuVisible: true,
     isSettingsMenuVisible: false,
-    isNotificationVisible: false,
-    notificationText: '',
+    notification: {
+      isNotificationVisible: false,
+      text: '',
+      timeout: 3000,
+    },
+    imageSettings: [defaultJpegSettings],
   },
   mutations: {
-    toggleSidebar(state, payload) {
-      state.isSideMenuVisible = payload.value;
+    updateSidebar(state, sidebar) {
+      state.isSideMenuVisible = sidebar.value;
     },
 
-    toggleSettings(state, payload) {
-      state.isSettingsMenuVisible = payload.value;
+    updateSettings(state, settings) {
+      state.isSettingsMenuVisible = settings.value;
     },
 
-    toggleNotifications(state, payload) {
-      state.isNotificationVisible = payload.value;
-      state.notificationText = payload.message;
+    updateNotifications(state, notifcations) {
+      state.notification.isNotificationVisible = notifcations.value;
+      state.notification.text = notifcations.message;
+    },
+
+    updateImageSetting(state, imageSetting) {
+      const settingId: number = state.imageSettings.findIndex(
+        n => n.name === imageSetting.name
+      );
+      state.imageSettings[settingId] = imageSetting;
     },
   },
   actions: {
+    async toggleSidebar({ commit }, sidebar) {
+      commit('updateSidebar', sidebar);
+    },
+    async toggleSettings({ commit }, settings) {
+      commit('updateSettings', settings);
+    },
+    async toggleNotifications({ commit }, notifcations) {
+      commit('updateNotifications', notifcations);
+    },
+    async updateNewImageSetting({ commit }, setting) {
+      commit('updateImageSetting', setting);
+    },
   },
-  modules: {
+  modules: {},
+  getters: {
+    isSidebarVisible: state => state.isSideMenuVisible,
+    isSettingsVisible: state => state.isSettingsMenuVisible,
+    getNotification: state => state.notification,
+    allImageSettings: state => state.imageSettings,
+    getJpegSettings: state => state.imageSettings.find(n => n.name === 'JPEG'),
   },
 });

@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <p> Welcome to Your Pichkoo App</p>
+    <p>Welcome to Your Pichkoo App</p>
   </div>
 </template>
 
