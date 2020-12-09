@@ -4,8 +4,9 @@
     <Sidebar />
     <Settings />
     <v-main>
-      <v-container fluid>
+      <v-container class="full-height" fluid>
         <router-view></router-view>
+        <v-spacer />
       </v-container>
     </v-main>
     <Notifications />
@@ -33,3 +34,9 @@ export default Vue.extend({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.full-height {
+  height: 100%;
+}
+</style>

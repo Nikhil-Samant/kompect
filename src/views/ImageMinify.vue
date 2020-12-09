@@ -50,9 +50,11 @@
 import Vue from 'vue';
 import { ipcRenderer } from 'electron';
 import path from 'path';
+import { LogType } from '@/electron/shared/Constants';
 import { mapActions, mapGetters } from 'vuex';
 import Progress from '@/components/Progress.vue';
-import { ImageRequest } from '../shared/model/ImageRequest';
+import Logger from '@/mixins/LoggerMixin';
+import { ImageRequest } from '@/electron/model/ImageRequest';
 
 export default Vue.extend({
   name: 'ImageMinify',
@@ -68,23 +70,39 @@ export default Vue.extend({
     valid: true,
   }),
   computed: {
-    ...mapGetters(['getNotification', 'getJpegSettings']),
+    ...mapGetters([
+      'getNotification',
+      'getJpegSettings',
+      'getPngSettings',
+      'isLosslessCompressionReq',
+    ]),
   },
   mounted() {
     this.$nextTick(() => {
       // Register IPC Renderer event handles once for this control
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      ipcRenderer.on('fileMinified', async (event, fileIndex) => {
+      ipcRenderer.on('fileMinified', async (event, file) => {
         this.fileMinified += 1;
         if (this.fileMinified === this.totalFiles) {
           this.isloading = false;
-          this.showNotification();
+          Logger.log(LogType.info, `--- ${this.totalFiles} completed.`);
+          this.showNotification(
+            `${this.totalFiles} image file(s) minified sucessfully.`
+          );
           this.reset();
         }
       });
       ipcRenderer.on('outputDir', async (event, directory: string) => {
         this.destination = directory;
       });
+      ipcRenderer.on(
+        'errorInCompressing',
+        async (event, errorMessage: string) => {
+          this.isloading = false;
+          Logger.log(LogType.error, `--- ${errorMessage}`);
+          this.showNotification('Failed to compress the Images');
+        }
+      );
     });
   },
   methods: {
@@ -96,24 +114,23 @@ export default Vue.extend({
       this.valid = (this.$refs.form as Vue & {
         validate: () => boolean;
       }).validate();
-      console.log(this.valid);
       if (!this.valid) {
         return;
       }
-      const request: ImageRequest[] = [];
       this.totalFiles = this.imageFiles.length;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const filePaths = this.imageFiles.map((f: any) => path.resolve(f.path));
       this.isloading = true;
-      filePaths.forEach(source =>
-        request.push({
-          source,
-          destination: this.destination,
-          imageSettings: {
-            jpegSetting: this.getJpegSettings,
-          },
-        })
-      );
+      const request: ImageRequest = {
+        source: filePaths.map(source => source),
+        destination: this.destination,
+        isLosslessCompressionReq: this.isLosslessCompressionReq,
+        imageSettings: {
+          jpegSetting: this.getJpegSettings,
+          pngSetting: this.getPngSettings,
+        },
+      };
+      console.log(request);
       ipcRenderer.invoke('minifyImageRequest', request);
     },
     reset() {
@@ -123,10 +140,10 @@ export default Vue.extend({
         reset: () => boolean;
       }).reset();
     },
-    async showNotification() {
+    async showNotification(message: string) {
       await this.toggleNotifications({
         value: true,
-        message: `${this.totalFiles} image file(s) minified sucessfully.`,
+        message,
       });
       setTimeout(async () => {
         await this.toggleNotifications({

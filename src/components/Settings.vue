@@ -17,11 +17,32 @@
           </v-list-item-avatar>
 
           <v-list-item-content>
-            <v-list-item-title>Settings</v-list-item-title>
+            <v-list-item-title class="text-h6"
+              >Quick Settings</v-list-item-title
+            >
           </v-list-item-content>
         </v-list-item>
       </template>
-      <settings-menu
+      <v-switch
+        class="pl-3"
+        v-model="$vuetify.theme.dark"
+        inset
+        label="Theme Dark"
+      ></v-switch>
+      <v-divider />
+      <v-checkbox
+        class="pl-3"
+        :value="isLosslessCompressionReq"
+        @click="toggleCompression"
+      >
+        <template v-slot:label>
+          <div>
+            Lossless Compression
+          </div>
+        </template>
+      </v-checkbox>
+      <v-divider />
+      <image-settings
         :setting="setting"
         v-for="setting in allImageSettings"
         :key="setting.name"
@@ -33,21 +54,32 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
-import SettingsMenu from './SettingsMenu.vue';
+import ImageSettings from './ImageSettings.vue';
 
 export default Vue.extend({
-  components: { SettingsMenu },
+  components: { ImageSettings },
   name: 'Settings',
   computed: {
-    ...mapGetters(['isSettingsVisible', 'allImageSettings']),
+    ...mapGetters([
+      'isSettingsVisible',
+      'allImageSettings',
+      'isLosslessCompressionReq',
+    ]),
   },
   methods: {
-    ...mapActions(['toggleSettings', 'updateNewJpegSettings']),
+    ...mapActions([
+      'toggleSettings',
+      'updateNewJpegSettings',
+      'toggleLosslessComp',
+    ]),
     onClickOutside() {
       this.toggleSettings({ value: false });
     },
     include() {
       return [document.querySelector('.included')];
+    },
+    toggleCompression() {
+      this.toggleLosslessComp(!this.isLosslessCompressionReq);
     },
   },
 });

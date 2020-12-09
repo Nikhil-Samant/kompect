@@ -1,0 +1,80 @@
+productName: "KomPect"
+appId: "com.electron.kompect"
+
+# Package electron code into a asar archive. Set to false to debug issues.
+asar: false
+#asarUnpack:
+#  - "node_modules/imagemin/**/*"
+#  - "node_modules/imagemin-mozjpeg/**/*"
+#  - "node_modules/imagemin-jpegtran/**/*"
+#  - "node_modules/imagemin-optipng/**/*"
+#  - "node_modules/imagemin-pngquant/**/*"
+#  - "node_modules/execa/**/*"
+#  - "node_modules/exec-buffer/**/*"
+#  - "node_modules/p-pipe/**/*"
+
+
+#files:
+#  - "dist_electron/bundled/"
+#  - "package.json"
+#  #- "dev-app-update.yml"
+#  - "!node_modules/imagemin/"
+#  - "!node_modules/imagemin-mozjpeg/"
+#
+#extraResources:
+#  - "node_modules/imagemin/"
+#  - "node_modules/imagemin-mozjpeg/"
+
+#protocols:
+#  - name: "BatchExplorer protocol"
+#    role: "Viewer"
+#    schemes:
+#     - ms-batchlabs
+#     - ms-batch-explorer
+#
+## Mac OS configuration
+mac:
+  icon: "public/img/icons/icon.icns"
+  category: "public.app-category.utilities"
+  target: "zip"
+
+## Windows configuration
+win:
+  icon: "public/img/icons/icon.ico"
+  target: "zip"
+#    - "nsis"
+#
+## Config for the windows installer
+#nsis:
+#  oneClick: true
+#  perMachine: true
+#
+## Linux configuration
+linux:
+  category: "Utility"
+  icon: "public/img/icons/32x32.png"
+  target: "zip"
+#    - "AppImage"
+#    - "deb"
+#    - "rpm"
+#
+#deb:
+#  depends:
+#    # --- Default START
+#    - gconf2
+#    - gconf-service
+#    - libnotify4
+#    - libappindicator1
+#    - libxtst6
+#    - libnss3
+#    # --- Default END
+#    - libsecret-1-0 # This is needed for keytar on linux
+#
+#directories:
+#  buildResources: "resources"
+#  output: "release"
+#
+#publish:
+#  provider: "generic"
+#  url: "https://batchlabsdist.blob.core.windows.net/releases"
+#

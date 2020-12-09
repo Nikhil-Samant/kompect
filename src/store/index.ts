@@ -1,20 +1,26 @@
+import { LogModel } from '@/electron/model/LogModel';
 import Vue from 'vue';
 import Vuex from 'vuex';
-import { defaultJpegSettings } from '../shared/model/JpegSettings';
+import {
+  defaultJpegSettings,
+  defaultPngSettings,
+} from '../electron/model/ImageSettings';
 
 Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
     /* Navigation Drawers */
-    isSideMenuVisible: true,
+    isSideMenuVisible: false,
     isSettingsMenuVisible: false,
     notification: {
       isNotificationVisible: false,
       text: '',
       timeout: 3000,
     },
-    imageSettings: [defaultJpegSettings],
+    imageSettings: [defaultJpegSettings, defaultPngSettings],
+    isLosslessCompressionReq: false,
+    logs: [] as LogModel[],
   },
   mutations: {
     updateSidebar(state, sidebar) {
@@ -36,6 +42,14 @@ export default new Vuex.Store({
       );
       state.imageSettings[settingId] = imageSetting;
     },
+
+    updateLogs(state, log: LogModel) {
+      state.logs.push(log);
+    },
+
+    toggleLosslessComp(state, value) {
+      state.isLosslessCompressionReq = value;
+    },
   },
   actions: {
     async toggleSidebar({ commit }, sidebar) {
@@ -50,6 +64,12 @@ export default new Vuex.Store({
     async updateNewImageSetting({ commit }, setting) {
       commit('updateImageSetting', setting);
     },
+    async updatelogger({ commit }, log) {
+      commit('updateLogs', log);
+    },
+    async toggleLosslessComp({ commit }, value) {
+      commit('toggleLosslessComp', value);
+    },
   },
   modules: {},
   getters: {
@@ -58,5 +78,8 @@ export default new Vuex.Store({
     getNotification: state => state.notification,
     allImageSettings: state => state.imageSettings,
     getJpegSettings: state => state.imageSettings.find(n => n.name === 'JPEG'),
+    getPngSettings: state => state.imageSettings.find(n => n.name === 'PNG'),
+    getLogs: state => state.logs,
+    isLosslessCompressionReq: state => state.isLosslessCompressionReq,
   },
 });

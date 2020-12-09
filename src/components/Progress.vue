@@ -1,5 +1,5 @@
 <template>
-  <v-dialog :value="isloading" hide-overlay persistent width="350">
+  <v-dialog :value="isloading" persistent width="350">
     <v-card color="light-blue lighten-2">
       <v-card-title class="pt-1"
         >{{ fileMinified }} minified out of {{ totalFiles }}</v-card-title

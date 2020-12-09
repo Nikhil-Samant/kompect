@@ -12,15 +12,15 @@
       <template v-slot:prepend>
         <v-list-item>
           <v-list-item-avatar>
-            <!-- Image -->
+            <v-icon>mdi-navigation</v-icon>
           </v-list-item-avatar>
 
           <v-list-item-content>
-            <v-list-item-title>Navigation</v-list-item-title>
+            <v-list-item-title class="text-h5">Menu</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </template>
-      <v-list dense rounded>
+      <v-list dense>
         <div v-for="menu in menus" :key="menu.label">
           <v-list-item :to="menu.to">
             <v-list-item-icon>
@@ -37,22 +37,12 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mapState, mapActions } from 'vuex';
+import { Menus } from '@/electron/model/Menu';
 
 export default Vue.extend({
   name: 'Sidebar',
   data: () => ({
-    menus: [
-      {
-        label: 'Home',
-        icon: 'mdi-home-city',
-        to: '/',
-      },
-      {
-        label: 'Minify Image',
-        icon: 'mdi-folder-multiple-image',
-        to: '/imageMinify',
-      },
-    ],
+    menus: Menus,
   }),
   computed: {
     ...mapState(['isSideMenuVisible']),

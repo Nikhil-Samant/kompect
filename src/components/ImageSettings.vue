@@ -38,7 +38,7 @@ import Vue from 'vue';
 import { mapActions } from 'vuex';
 
 export default Vue.extend({
-  name: 'SettingsMenu',
+  name: 'ImageSettings',
   props: {
     setting: {
       type: Object,

@@ -4,7 +4,10 @@ import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
 import imagemin from 'imagemin';
 import imageminMozjpeg from 'imagemin-mozjpeg';
-import { ImageRequest } from './shared/model/ImageRequest';
+import imageminPngquant from 'imagemin-pngquant';
+import imageminJpegtran from 'imagemin-jpegtran';
+import imageminOptipng from 'imagemin-optipng';
+import { ImageRequest } from './electron/model/ImageRequest';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
@@ -96,21 +99,27 @@ ipcMain.handle('openDirectory', event => {
     });
 });
 
-ipcMain.handle('minifyImageRequest', (event, images: ImageRequest[]) => {
-  images.forEach(async (image, index) => {
-    const dest = image.destination;
-    await imagemin([image.source as string], {
-      destination: dest,
-      plugins: [
-        imageminMozjpeg({ quality: image.imageSettings.jpegSetting.quality }),
-      ],
+ipcMain.handle('minifyImageRequest', (event, images: ImageRequest) => {
+  const lossyPlugin = [imageminJpegtran(), imageminOptipng()];
+  const losslessPlugins = [
+    imageminMozjpeg({ quality: images.imageSettings.jpegSetting.quality }),
+    imageminPngquant(),
+  ];
+  const plugins = images.isLosslessCompressionReq
+    ? losslessPlugins
+    : lossyPlugin;
+
+  images.source.forEach(async image => {
+    await imagemin([image], {
+      destination: images.destination,
+      plugins,
     })
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       .then(file => {
-        event.sender.send('fileMinified', index);
+        event.sender.send('fileMinified', file[0].destinationPath);
       })
       .catch(error => {
-        console.log(error);
+        event.sender.send('errorInCompressing', error.message);
       });
   });
 });
