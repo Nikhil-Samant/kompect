@@ -25,13 +25,6 @@ asar: false
 #  - "node_modules/imagemin/"
 #  - "node_modules/imagemin-mozjpeg/"
 
-#protocols:
-#  - name: "BatchExplorer protocol"
-#    role: "Viewer"
-#    schemes:
-#     - ms-batchlabs
-#     - ms-batch-explorer
-#
 ## Mac OS configuration
 mac:
   icon: "public/img/icons/icon.icns"
@@ -58,23 +51,7 @@ linux:
 #    - "deb"
 #    - "rpm"
 #
-#deb:
-#  depends:
-#    # --- Default START
-#    - gconf2
-#    - gconf-service
-#    - libnotify4
-#    - libappindicator1
-#    - libxtst6
-#    - libnss3
-#    # --- Default END
-#    - libsecret-1-0 # This is needed for keytar on linux
-#
 #directories:
 #  buildResources: "resources"
 #  output: "release"
-#
-#publish:
-#  provider: "generic"
-#  url: "https://batchlabsdist.blob.core.windows.net/releases"
 #
